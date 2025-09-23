@@ -1,3 +1,4 @@
+// app/api/stripe-webhook/route.ts
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabase } from '../../../lib/supabaseClient';
@@ -5,6 +6,23 @@ import { supabase } from '../../../lib/supabaseClient';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: '2025-08-27.basil',
 });
+
+// Helper function to send confirmation email by calling our new API route
+async function sendConfirmationEmail(user: any, classDetails: any) {
+    try {
+        // We need the full site URL to make an internal API call from the server
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
+        await fetch(`${siteUrl}/api/booking-confirmation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user, classDetails }),
+        });
+    } catch (error) {
+        console.error('Failed to send confirmation email:', error);
+        // We don't block the process if email fails, just log it.
+    }
+}
 
 export async function POST(req: Request) {
     const body = await req.text();
@@ -31,15 +49,39 @@ export async function POST(req: Request) {
             }));
 
             if (bookingsToInsert.length > 0) {
-                const { error } = await supabase.from('Bookings').insert(bookingsToInsert);
+                // 1. Create the bookings in the database
+                const { data: newBookings, error } = await supabase
+                    .from('Bookings')
+                    .insert(bookingsToInsert)
+                    .select(); // Important: .select() returns the created records
 
                 if (error) {
                     console.error('Error creating bookings:', error);
-                    // Even if DB fails, Stripe payment is complete, so return 200
-                    // You might want to add more robust error handling here,
-                    // like sending an alert to yourself.
-                } else {
-                    console.log(`Successfully created ${bookingsToInsert.length} bookings for user ${userId}.`);
+                    return new NextResponse('Failed to create bookings.', { status: 500 });
+                }
+
+                // 2. Fetch user and class details for the confirmation emails
+                try {
+                    const { data: userData } = await supabase
+                        .from('Users')
+                        .select('name, email')
+                        .eq('id', userId)
+                        .single();
+
+                    const classIds = parsedItems.map((item: { id: any; }) => Number(item.id));
+                    const { data: classesData } = await supabase
+                        .from('classes')
+                        .select('*')
+                        .in('id', classIds);
+
+                    // 3. Send a confirmation email for each class booked
+                    if (userData && classesData) {
+                        for (const classDetail of classesData) {
+                            await sendConfirmationEmail(userData, classDetail);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error fetching data for confirmation email:", e);
                 }
             }
         }
