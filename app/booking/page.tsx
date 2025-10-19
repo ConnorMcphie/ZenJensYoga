@@ -167,14 +167,15 @@ export default function BookingPage() {
     };
 
     // Correctly type the function parameter using the imported Value type
-    const onDateChange = (value: CalendarValue, _event: MouseEvent<HTMLButtonElement>) => { // Added underscore        const date = Array.isArray(value) ? value[0] : value;
-        // Ensure the selected value is a Date object before setting
-        if (date instanceof Date) {
-            setCalendarDate(date);
-        } else if (date === null) {
-            // Handle null case if needed, maybe do nothing or set a default
+    const onDateChange = (value: CalendarValue, _event: MouseEvent<HTMLButtonElement>) => {
+        const date = Array.isArray(value) ? value[0] : value; // This variable holds the actual selected value
+        // Check if the VARIABLE 'date' is an instance of the TYPE 'Date'
+        if (date instanceof Date) { // CORRECT: Use the variable 'date' here
+            setCalendarDate(date);   // CORRECT: Set state using the variable 'date'
+        } else if (date === null) {  // CORRECT: Check if the variable 'date' is null
+            // Handle null case if needed
+            console.log("Date selection cleared or invalid range");
         }
-        // 'event' parameter is accepted but not used here
     };
 
 
