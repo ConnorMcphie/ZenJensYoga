@@ -44,7 +44,7 @@ export default function AuthPage() {
             let responseData;
             try {
                 responseData = await res.json();
-            } catch (jsonError) {
+            } catch (_jsonError) {
                 // If parsing fails (e.g., 405 error before backend fix)
                 throw new Error(`Server responded unexpectedly. Status: ${res.status}`);
             }
@@ -99,7 +99,7 @@ export default function AuthPage() {
             let responseData;
             try {
                 responseData = await res.json();
-            } catch (jsonError) {
+            } catch (_jsonError) {
                 // If parsing fails even after backend changes, throw a clearer error
                 throw new Error(`Server sent an invalid response. Status: ${res.status}`);
             }
