@@ -8,19 +8,21 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 
+const quotes =[
+    "Yoga is the journey of the self, through the self, to the self. – Bhagavad Gita",
+    "The nature of yoga is to shine the light of awareness into the darkest corners of the body. – Jason Crandell",
+    "Yoga takes you into the present moment. The only place where life exists.",
+    "Inhale the future, exhale the past.",
+    "Yoga is the art work of awareness on the canvas of body, mind, and soul.",
+    "Yoga is a mirror to look at ourselves from within",
+    "Yoga does not just change the way we see things, it transforms the person who sees.",
+    "When you listen to yourself, everything comes naturally. It comes from inside, like a kind of will to do something. Try to be sensitive. That is yoga.",
+    "Yoga is the dance of every cell with the music of every breath that creates inner serenity and harmony"
+];
+
 export default function Home() {
 
-    const quotes =[
-        "Yoga is the journey of the self, through the self, to the self. – Bhagavad Gita",
-        "The nature of yoga is to shine the light of awareness into the darkest corners of the body. – Jason Crandell",
-        "Yoga takes you into the present moment. The only place where life exists.",
-        "Inhale the future, exhale the past.",
-        "Yoga is the art work of awareness on the canvas of body, mind, and soul.",
-        "Yoga is a mirror to look at ourselves from within",
-        "Yoga does not just change the way we see things, it transforms the person who sees.",
-        "When you listen to yourself, everything comes naturally. It comes from inside, like a kind of will to do something. Try to be sensitive. That is yoga.",
-        "Yoga is the dance of every cell with the music of every breath that creates inner serenity and harmony"
-    ];
+
 
     const [quote, setQuote] = useState("");
 

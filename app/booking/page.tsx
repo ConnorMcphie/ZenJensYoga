@@ -167,8 +167,7 @@ export default function BookingPage() {
     };
 
     // Correctly type the function parameter using the imported Value type
-    const onDateChange = (value: CalendarValue, event: MouseEvent<HTMLButtonElement>) => {
-        const date = Array.isArray(value) ? value[0] : value;
+    const onDateChange = (value: CalendarValue, _event: MouseEvent<HTMLButtonElement>) => { // Added underscore        const date = Array.isArray(value) ? value[0] : value;
         // Ensure the selected value is a Date object before setting
         if (date instanceof Date) {
             setCalendarDate(date);

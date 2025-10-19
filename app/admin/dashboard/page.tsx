@@ -284,8 +284,8 @@ export default function AdminDashboard() {
     };
 
     // FIX: Update function signature with correct types
-    const handleCalendarChange = (value: CalendarValue, event: MouseEvent<HTMLButtonElement>) => {
-        const newDate = Array.isArray(value) ? value[0] : value;
+    const handleCalendarChange = (value: CalendarValue, _event: MouseEvent<HTMLButtonElement>) => { // Added underscore
+           const newDate = Array.isArray(value) ? value[0] : value;
         if (newDate instanceof Date) { // Check if it's a valid Date object
             setCalendarDate(newDate);
         } else if (newDate === null) {

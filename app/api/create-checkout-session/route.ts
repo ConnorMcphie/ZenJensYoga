@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+type CartItem = {
+    id: number;
+    title: string;
+    price: number;
+};
 
 // Check if the environment variable is loaded. This will log on server start.
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -45,7 +50,7 @@ export async function POST(req: Request) {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
-      line_items: items.map((item: any) => ({
+      line_items: items.map((item: CartItem) => ({
         price_data: {
           currency: "gbp",
           product_data: { name: item.title },
@@ -57,22 +62,23 @@ export async function POST(req: Request) {
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/checkout?canceled=true`,
       metadata: {
         userId: userId?.toString() || "guest",
-        items: JSON.stringify(items.map((item: { id: any; }) => ({ id: item.id }))),
+        items: JSON.stringify(items.map((item: { id: CartItem; }) => ({ id: item.id }))),
       },
     });
 
     console.log("Stripe session created successfully:", session.id);
     return NextResponse.json({ url: session.url });
 
-  } catch (err: any) {
+  } catch (err: unknown) {
     // 4. Log the DETAILED error from Stripe. This is the most important part.
     console.error("--- STRIPE API ERROR ---");
     console.error(err);
     console.error("--- END STRIPE API ERROR ---");
 
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
     // Return a more informative error to the client.
     return NextResponse.json(
-        { error: "Failed to create checkout session.", details: err.message },
+        { error: "Failed to create checkout session.", details: errorMessage },
         { status: 500 }
     );
   }

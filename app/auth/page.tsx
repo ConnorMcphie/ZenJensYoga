@@ -50,9 +50,10 @@ export default function AuthPage() {
             localStorage.setItem('user', JSON.stringify(user));
             router.push(user.is_admin ? '/admin/dashboard' : '/booking');
 
-        } catch (error: any) {
+        } catch (error: unknown) { // Changed to unknown
             console.error('Login error:', error);
-            setError(error.message || 'An unexpected error occurred. Please try again.');
+            const message = error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.';
+            setError(message);
         } finally {
             setLoading(false);
         }
@@ -85,9 +86,10 @@ export default function AuthPage() {
             localStorage.setItem('user', JSON.stringify(newUser));
             router.push('/booking');
 
-        } catch (error: any) {
+        } catch (error: unknown) { // Changed to unknown
             console.error('Signup error:', error);
-            setError(error.message || 'An unexpected error occurred. Please try again.');
+            const message = error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.';
+            setError(message);
         } finally {
             setLoading(false);
         }

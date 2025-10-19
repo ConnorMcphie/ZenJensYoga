@@ -3,12 +3,23 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { supabase } from '../../../lib/supabaseClient';
 
+
+type UserInfo = { name?: string | null; email: string };
+type ClassInfo = {
+    id: number;
+    title: string;
+    date: string;
+    time: string;
+    duration: number;
+    // Add other needed fields like description
+};
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: '2025-08-27.basil',
 });
 
 // Helper function to send confirmation email by calling our new API route
-async function sendConfirmationEmail(user: any, classDetails: any) {
+async function sendConfirmationEmail(user: UserInfo, classDetails: ClassInfo) {
     try {
         // We need the full site URL to make an internal API call from the server
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
@@ -33,8 +44,9 @@ export async function POST(req: Request) {
 
     try {
         event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
-    } catch (err: any) {
-        return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
+    } catch (err: unknown) { // Change any to unknown
+        const message = err instanceof Error ? err.message : 'Unknown webhook error';
+        return new NextResponse(`Webhook Error: ${message}`, { status: 400 });
     }
 
     if (event.type === 'checkout.session.completed') {
@@ -43,17 +55,16 @@ export async function POST(req: Request) {
 
         if (items && userId) {
             const parsedItems = JSON.parse(items);
-            const bookingsToInsert = parsedItems.map((item: { id: any; }) => ({
+            const bookingsToInsert = parsedItems.map((item: { id: number; }) => ({
                 classid: Number(item.id),
                 userid: Number(userId),
             }));
 
             if (bookingsToInsert.length > 0) {
                 // 1. Create the bookings in the database
-                const { data: newBookings, error } = await supabase
+                const { error } = await supabase // Removed 'data: newBookings,'
                     .from('Bookings')
-                    .insert(bookingsToInsert)
-                    .select(); // Important: .select() returns the created records
+                    .insert(bookingsToInsert);
 
                 if (error) {
                     console.error('Error creating bookings:', error);
@@ -68,7 +79,7 @@ export async function POST(req: Request) {
                         .eq('id', userId)
                         .single();
 
-                    const classIds = parsedItems.map((item: { id: any; }) => Number(item.id));
+                    const classIds = parsedItems.map((item: { id: number; }) => Number(item.id));
                     const { data: classesData } = await supabase
                         .from('classes')
                         .select('*')

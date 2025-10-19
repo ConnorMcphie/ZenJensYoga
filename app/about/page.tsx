@@ -2,6 +2,7 @@
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Image from "next/image";
 
 
 export default function Page() {
@@ -74,9 +75,11 @@ export default function Page() {
                         <div className="w-full">
                             <div className="overflow-hidden rounded-xl shadow-xl aspect-[3/4] bg-[#e6f4f1]">
                                 {/* Replace with actual image */}
-                                <img
+                                <Image
                                     src="/budhaPose.jpg"
                                     alt="Jen, yoga instructor"
+                                    width={600} // Add appropriate width
+                                    height={800} // Add appropriate height (maintain aspect ratio)
                                     className="object-cover w-full h-full transition-transform duration-500 hover:scale-105"
                                 />
                             </div>

@@ -58,10 +58,12 @@ export async function POST(req: Request) {
         });
 
         return NextResponse.json({ success: true });
-    } catch (error: any) {
+    } catch (error: unknown) { // Change any to unknown
         console.error("[SEND RESET CODE ERROR]", error);
+        // Type check before accessing message
+        const errorMessage = error instanceof Error ? error.message : "Internal server error";
         return NextResponse.json(
-            { message: error.message || "Internal server error" },
+            { message: errorMessage },
             { status: 500 }
         );
     }
