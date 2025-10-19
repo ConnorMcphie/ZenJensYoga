@@ -6,7 +6,6 @@ import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import Link from "next/link";
 
 
 export default function Home() {
@@ -29,7 +28,7 @@ export default function Home() {
     useEffect(()=> {
         const randomIndex = Math.floor(Math.random() * quotes.length);
         setQuote(quotes[randomIndex]);
-    }, []);
+    }, [quotes]);
 
     const Map = useMemo(() => dynamic(() => import("@/components/Map"), { ssr: false }), []);
 

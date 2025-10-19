@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, MouseEvent } from 'react';
 // FIX: Correctly import the 'Value' type using 'import type' on a separate line
 import Calendar from 'react-calendar';
-import type { Value } from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { supabase } from '../../../lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { Value } from "react-calendar";
 
 // --- TYPE DEFINITIONS ---
 type AdminUser = {
@@ -283,11 +283,12 @@ export default function AdminDashboard() {
         return has ? <div className="h-2 w-2 rounded-full bg-[#2e7d6f] mt-1 mx-auto" /> : null;
     };
 
-    const handleCalendarChange = (value: Value) => {
+    const handleCalendarChange = (value: Value, event: MouseEvent<HTMLButtonElement>) => {
         const newDate = Array.isArray(value) ? value[0] : value;
         if (newDate) {
             setCalendarDate(newDate);
         }
+        // You don't have to use the 'event' argument if you don't need it
     };
 
     const handleLogout = () => {
@@ -391,8 +392,7 @@ export default function AdminDashboard() {
                         </div>
                     ) : (
                         <div className="mx-auto max-w-3xl p-6 bg-white rounded-xl shadow-lg border border-green-200">
-                            <Calendar onChange={handleCalendarChange} value={calendarDate} tileContent={tileContent} className="rounded-lg" />
-                            <div className="mt-6">
+                            <Calendar onChange={handleCalendarChange} value={calendarDate} tileContent={tileContent} className="rounded-lg" />                            <div className="mt-6">
                                 <h3 className="text-xl font-semibold text-[#2e7d6f] mb-4">Classes on {calendarDate.toDateString()}</h3>
                                 {classesOnDate(calendarDate).length === 0 ? <p className="text-gray-500">No classes scheduled.</p> : classesOnDate(calendarDate).map(cls => (
                                     <div key={cls.id} className="bg-green-50 rounded-lg p-4 mb-2 border">

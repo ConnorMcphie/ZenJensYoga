@@ -76,7 +76,7 @@ export default function WaiverPage() {
         }
 
         if (hasParqYes) {
-            alert("Based on your answers, we strongly recommend you consult with your doctor before participating in any physical activity. By proceeding, you acknowledge this recommendation and accept full responsibility for your participation.");
+            alert(`Based on your answers, we strongly recommend you consult with your doctor before participating in any physical activity. By proceeding, you acknowledge this recommendation and accept full responsibility for your participation.`);
         }
 
         setLoading(true);
@@ -163,7 +163,7 @@ export default function WaiverPage() {
                         ))}
                         {hasParqYes && (
                             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800">
-                                <strong>Important:</strong> As you answered "Yes" to one or more questions, we strongly advise consulting with your doctor before participating.
+                                <strong>Important:</strong> As you answered &#34;Yes&#34; to one or more questions, we strongly advise consulting with your doctor before participating.
                             </div>
                         )}
                     </section>

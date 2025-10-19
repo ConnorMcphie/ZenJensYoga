@@ -9,6 +9,8 @@ import BookingPageHeader from "@/components/BoookingPageHeader";
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import toast from 'react-hot-toast';
+import {useCallback} from "react";
+import Value from "react-calendar";
 
 type YogaClass = {
     id: number;
@@ -26,13 +28,31 @@ type YogaClass = {
 export default function BookingPage() {
     const [classes, setClasses] = useState<YogaClass[]>([]);
     const [loading, setLoading] = useState(true);
-    const [user, setUser] = useState<any>(null);
-    const router = useRouter();
+    type User = {
+        id: number;
+        email: string;
+    };    const router = useRouter();
+    const [user, setUser] = useState<User | null>(null);
 
     const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
     const [cart, setCart] = useState<YogaClass[]>([]);
     const [calendarDate, setCalendarDate] = useState(new Date());
     const [userBookings, setUserBookings] = useState<number[]>([]);
+
+
+    const fetchUserBookings = useCallback(async () => {
+        if (!user) return;
+        const { data, error } = await supabase
+            .from('Bookings')
+            .select('classid')
+            .eq('userid', user.id);
+        if (error) {
+            console.error('Error fetching user bookings:', error);
+        } else {
+            setUserBookings(data?.map(b => b.classid) || []);
+        }
+    }, [user]); // Add user dependency
+
 
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
@@ -46,7 +66,7 @@ export default function BookingPage() {
         if (user) {
             fetchUserBookings();
         }
-    }, [user]);
+    }, [user, fetchUserBookings]); // Add fetchUserBookings here
 
     const fetchClassesAndBookings = async () => {
         setLoading(true);
@@ -68,18 +88,6 @@ export default function BookingPage() {
         setLoading(false);
     };
 
-    const fetchUserBookings = async () => {
-        if (!user) return;
-        const { data, error } = await supabase
-            .from('Bookings')
-            .select('classid')
-            .eq('userid', user.id);
-        if (error) {
-            console.error('Error fetching user bookings:', error);
-        } else {
-            setUserBookings(data?.map(b => b.classid) || []);
-        }
-    };
 
     const isAlreadyBooked = (classId: number) => userBookings.includes(classId);
 
@@ -119,8 +127,12 @@ export default function BookingPage() {
         router.push('/waiver');
     };
 
-    const onDateChange = (date: any) => setCalendarDate(date);
-
+    const onDateChange = (value: typeof Value) => {
+        const date = Array.isArray(value) ? value[0] : value;
+        if (date) {
+            setCalendarDate(date);
+        }
+    };
     const classesOnDate = classes.filter(
         cls => new Date(cls.date).toDateString() === calendarDate.toDateString()
     );

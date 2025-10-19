@@ -53,8 +53,12 @@ export default function ResetPasswordPage() {
             }
 
             setSuccess(true);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) { // Changed 'any' to 'unknown'
+            if (err instanceof Error) { // Check if it's an Error object
+                setError(err.message);
+            } else {
+                setError('An unexpected error occurred.');
+            }
         } finally {
             setLoading(false);
         }
