@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useEffect, useMemo, useState, MouseEvent } from 'react';
-// FIX: Correctly import the 'Value' type using 'import type' on a separate line
 import Calendar from 'react-calendar';
+type CalendarValue = Date | [Date | null, Date | null] | null;
+
 import 'react-calendar/dist/Calendar.css';
 import { supabase } from '../../../lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Value } from "react-calendar";
 
 // --- TYPE DEFINITIONS ---
 type AdminUser = {
@@ -283,13 +283,18 @@ export default function AdminDashboard() {
         return has ? <div className="h-2 w-2 rounded-full bg-[#2e7d6f] mt-1 mx-auto" /> : null;
     };
 
-    const handleCalendarChange = (value: Value, event: MouseEvent<HTMLButtonElement>) => {
+    // FIX: Update function signature with correct types
+    const handleCalendarChange = (value: CalendarValue, event: MouseEvent<HTMLButtonElement>) => {
         const newDate = Array.isArray(value) ? value[0] : value;
-        if (newDate) {
+        if (newDate instanceof Date) { // Check if it's a valid Date object
             setCalendarDate(newDate);
+        } else if (newDate === null) {
+            // Optionally handle the case where the date selection is cleared
+            // For example, reset to today: setCalendarDate(new Date());
         }
-        // You don't have to use the 'event' argument if you don't need it
+        // event parameter is now accepted but not used
     };
+
 
     const handleLogout = () => {
         localStorage.removeItem('adminUser');
@@ -304,11 +309,13 @@ export default function AdminDashboard() {
         setEditFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
     };
 
-    if (loading) {
+    if (loading && !user) { // Show loading only if user data hasn't loaded yet
         return (
             <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#d1f0e5] to-white">
                 <Navbar />
-                <main className="flex-1 px-4 py-10 sm:px-6 lg:px-12"><p>Loading...</p></main>
+                <main className="flex-1 px-4 py-10 sm:px-6 lg:px-12 flex justify-center items-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2e7d6f]"></div>
+                </main>
                 <Footer />
             </div>
         );
@@ -319,99 +326,173 @@ export default function AdminDashboard() {
             <Navbar />
             <main className="flex-1 px-4 py-10 sm:px-6 lg:px-12">
                 <div className="max-w-6xl mx-auto space-y-10">
-                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <h1 className="text-3xl font-bold text-green-800">Admin Dashboard</h1>
-                        {user && <span className="text-gray-600 font-medium">Welcome, {user.name}!</span>}
-                        <div className="flex items-center gap-3">
-                            <button onClick={() => setViewMode('list')} className={`px-4 py-2 rounded ${viewMode === 'list' ? 'bg-[#2e7d6f] text-white' : 'bg-gray-200'}`}>List View</button>
-                            <button onClick={() => setViewMode('calendar')} className={`px-4 py-2 rounded ${viewMode === 'calendar' ? 'bg-[#2e7d6f] text-white' : 'bg-gray-200'}`}>Calendar View</button>
-                            <button onClick={handleLogout} className="text-sm bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200">Log out</button>
+                    {/* Header Section */}
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-white rounded-lg shadow border border-gray-100">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-green-800">Admin Dashboard</h1>
+                        <div className="flex items-center gap-3 flex-wrap justify-center">
+                            {user && <span className="text-gray-600 font-medium text-sm sm:text-base">Welcome, {user.name}!</span>}
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => setViewMode('list')} className={`px-3 py-1.5 rounded text-sm ${viewMode === 'list' ? 'bg-[#2e7d6f] text-white' : 'bg-gray-200 hover:bg-gray-300'}`}>List</button>
+                                <button onClick={() => setViewMode('calendar')} className={`px-3 py-1.5 rounded text-sm ${viewMode === 'calendar' ? 'bg-[#2e7d6f] text-white' : 'bg-gray-200 hover:bg-gray-300'}`}>Calendar</button>
+                            </div>
+                            <button onClick={handleLogout} className="text-sm bg-red-100 text-red-600 px-3 py-1.5 rounded hover:bg-red-200">Log out</button>
                         </div>
                     </div>
 
+                    {/* Add Class Form */}
                     <div className="bg-white shadow-lg rounded-2xl border border-green-100 p-6 space-y-6">
                         <h2 className="text-xl font-semibold text-green-700">Add New Class</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <input name="title" value={formData.title} onChange={handleFormChange} placeholder="Title" className="p-3 border border-gray-300 rounded-xl" />
-                            <input type="date" name="date" value={formData.date} onChange={handleFormChange} className="p-3 border border-gray-300 rounded-xl" />
-                            <input type="time" name="time" value={formData.time} onChange={handleFormChange} className="p-3 border border-gray-300 rounded-xl" />
-                            <input type="number" name="capacity" value={formData.capacity} onChange={handleFormChange} placeholder="Capacity" className="p-3 border border-gray-300 rounded-xl" />
-                            <input type="number" name="duration" value={formData.duration} onChange={handleFormChange} placeholder="Duration (minutes)" className="p-3 border border-gray-300 rounded-xl" />
-                            <input type="number" step="0.01" name="price" value={formData.price} onChange={handleFormChange} placeholder="Price (£)" className="p-3 border border-gray-300 rounded-xl" />
+                            <input name="title" value={formData.title} onChange={handleFormChange} placeholder="Title *" required className="p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                            <input type="date" name="date" value={formData.date} onChange={handleFormChange} required className="p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                            <input type="time" name="time" value={formData.time} onChange={handleFormChange} required className="p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                            <input type="number" name="capacity" value={formData.capacity} onChange={handleFormChange} placeholder="Capacity (e.g., 10)" className="p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                            <input type="number" name="duration" value={formData.duration} onChange={handleFormChange} placeholder="Duration (mins, e.g., 60)" className="p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                            <input type="number" step="0.01" name="price" value={formData.price} onChange={handleFormChange} placeholder="Price (£, e.g., 10.00)" className="p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500" />
                         </div>
-                        <textarea name="description" value={formData.description} onChange={handleFormChange} placeholder="Description" className="w-full p-3 border border-gray-300 rounded-xl" />
+                        <textarea name="description" value={formData.description} onChange={handleFormChange} placeholder="Description (Optional)" rows={3} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-green-500 focus:border-green-500" />
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                            <label className="flex items-center gap-2">
-                                <input type="checkbox" checked={repeatWeekly} onChange={() => setRepeatWeekly(!repeatWeekly)} />
-                                Repeat weekly
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" checked={repeatWeekly} onChange={() => setRepeatWeekly(!repeatWeekly)} className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"/>
+                                <span className="text-sm text-gray-700">Repeat weekly</span>
                             </label>
-                            {repeatWeekly && <input type="number" min={1} max={20} value={repeatCount} onChange={(e) => setRepeatCount(Number(e.target.value))} className="p-2 border border-gray-300 rounded-xl w-40" placeholder="Weeks" />}
+                            {repeatWeekly && (
+                                <div className='flex items-center gap-2'>
+                                    <span className="text-sm text-gray-700">for the next</span>
+                                    <input type="number" min={1} max={20} value={repeatCount} onChange={(e) => setRepeatCount(Math.max(1, Number(e.target.value)))} className="p-2 border border-gray-300 rounded-lg w-20 text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                                    <span className="text-sm text-gray-700">weeks</span>
+                                </div>
+                            )}
                         </div>
                         <div>
-                            <button onClick={createClass} className="bg-green-700 text-white font-semibold px-6 py-3 rounded-xl hover:bg-green-800 transition">Add Class</button>
+                            <button onClick={createClass} className="bg-green-700 text-white font-semibold px-6 py-2.5 rounded-lg hover:bg-green-800 transition shadow">Add Class</button>
                         </div>
                     </div>
+
+                    {/* Class List or Calendar View */}
                     {viewMode === 'list' ? (
-                        <div className="grid gap-6">
-                            {classes.map((cls) => (
-                                <section key={cls.id} className="bg-white rounded-2xl shadow-md border border-green-100 p-6 transition-all duration-500">
-                                    <div className="flex flex-col lg:flex-row gap-6">
-                                        <div className={`${openRegisterId === cls.id ? 'lg:w-1/2' : 'w-full'}`}>
-                                            {editingId === cls.id ? (
-                                                <>
-                                                    <input type="text" name="title" value={editFormData.title || ''} onChange={handleEditChange} className="w-full p-3 border rounded-xl mb-3" />
-                                                    <input type="date" name="date" value={editFormData.date || ''} onChange={handleEditChange} className="w-full p-3 border rounded-xl mb-3" />
-                                                    <textarea name="description" value={editFormData.description || ''} onChange={handleEditChange} className="w-full p-3 border rounded-xl mb-3" />
-                                                    <button onClick={() => updateClass(cls.id)} className="text-green-700 hover:underline">Save</button>
-                                                    <button onClick={() => setEditingId(null)} className="text-gray-500 hover:underline ml-4">Cancel</button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <h2 className="text-xl font-semibold text-green-800">{cls.title}</h2>
-                                                    <p className="text-sm text-gray-600 italic">{cls.date} {cls.time ? `at ${cls.time}` : ''}</p>
-                                                    <p className="text-gray-700 mt-2">{cls.description}</p>
-                                                    <div className="flex gap-4 pt-2">
-                                                        <button onClick={() => startEdit(cls)} className="text-blue-600 hover:underline">Edit</button>
-                                                        <button onClick={() => deleteClass(cls.id)} className="text-red-600 hover:underline">Delete</button>
-                                                        <button onClick={() => fetchRegister(cls.id)} className="px-3 py-2 border border-green-500 rounded-xl text-green-700">{openRegisterId === cls.id ? 'Hide Register' : 'View Register'}</button>
+                        <div className="space-y-6">
+                            <h2 className="text-2xl font-semibold text-green-800 border-b pb-2">Manage Classes</h2>
+                            {loading ? (
+                                <p className="text-center text-gray-500">Loading classes...</p>
+                            ) : classes.length === 0 ? (
+                                <p className="text-center text-gray-500 italic">No classes found.</p>
+                            ) : (
+                                classes.map((cls) => (
+                                    <section key={cls.id} className="bg-white rounded-xl shadow-md border border-green-100 p-4 sm:p-6 transition-all duration-300 ease-in-out">
+                                        <div className="flex flex-col lg:flex-row gap-4">
+                                            {/* Class Details / Edit Form */}
+                                            <div className={`${openRegisterId === cls.id ? 'lg:w-2/3' : 'w-full'} space-y-3`}>
+                                                {editingId === cls.id ? (
+                                                    // Edit Form
+                                                    <div className='space-y-3'>
+                                                        <h3 className="text-lg font-semibold text-gray-700">Editing Class</h3>
+                                                        <input type="text" name="title" placeholder='Title *' value={editFormData.title || ''} onChange={handleEditChange} required className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                                                        <textarea name="description" placeholder='Description' value={editFormData.description || ''} onChange={handleEditChange} rows={3} className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                                                        <div className='grid grid-cols-2 gap-3'>
+                                                            <input type="date" name="date" value={editFormData.date || ''} onChange={handleEditChange} required className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                                                            <input type="time" name="time" value={editFormData.time || ''} onChange={handleEditChange} required className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                                                            <input type="number" name="capacity" placeholder='Capacity' value={editFormData.capacity ?? ''} onChange={handleEditChange} className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                                                            <input type="number" name="duration" placeholder='Duration (mins)' value={editFormData.duration ?? ''} onChange={handleEditChange} className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                                                            <input type="number" step="0.01" name="price" placeholder='Price (£)' value={editFormData.price ?? ''} onChange={handleEditChange} className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500 col-span-2" />
+                                                        </div>
+                                                        <div className='flex gap-3'>
+                                                            <button onClick={() => updateClass(cls.id)} className="px-4 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-medium">Save Changes</button>
+                                                            <button onClick={() => setEditingId(null)} className="px-4 py-1.5 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm">Cancel</button>
+                                                        </div>
                                                     </div>
-                                                </>
-                                            )}
-                                        </div>
-                                        <div className={`transition-all duration-500 ease-in-out overflow-hidden ${openRegisterId === cls.id ? 'opacity-100 lg:w-1/2 max-h-[500px]' : 'opacity-0 w-0 max-h-0'}`}>
-                                            <div className="bg-gray-50 border border-gray-200 p-4 rounded-2xl shadow-inner overflow-y-auto h-full">
-                                                <h3 className="font-semibold text-gray-700 mb-3">Registered Participants:</h3>
-                                                {registrations[cls.id]?.length > 0 ? (
-                                                    <ul className="space-y-3">{registrations[cls.id].map(reg => <li key={reg.bookingId} className="p-3 rounded-lg bg-white border"><span className="block font-medium">{reg.name}</span><span className="text-xs text-gray-500">{reg.email}</span></li>)}</ul>
-                                                ) : <p className="text-sm text-gray-500 italic">No participants yet.</p>}
+                                                ) : (
+                                                    // Display Class Details
+                                                    <div>
+                                                        <h2 className="text-xl font-semibold text-green-800">{cls.title}</h2>
+                                                        <p className="text-sm text-gray-600 italic mb-2">{new Date(cls.date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} {cls.time ? `at ${cls.time}` : ''}</p>
+                                                        <p className="text-gray-700 mt-1 text-sm">{cls.description}</p>
+                                                        <div className="text-sm mt-2 space-x-4">
+                                                            <span>Capacity: {cls.capacity}</span>
+                                                            <span>Duration: {cls.duration} mins</span>
+                                                            <span>Price: £{cls.price?.toFixed(2)}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-4 pt-3 mt-3 border-t border-gray-100">
+                                                            <button onClick={() => startEdit(cls)} className="text-sm text-blue-600 hover:underline">Edit</button>
+                                                            <button onClick={() => deleteClass(cls.id)} className="text-sm text-red-600 hover:underline">Delete Class</button>
+                                                            <button onClick={() => fetchRegister(cls.id)} className="px-3 py-1.5 border border-green-500 rounded-md text-green-700 hover:bg-green-50 text-xs font-medium">
+                                                                {openRegisterId === cls.id ? 'Hide Register' : `View Register (${cls.currentBookings}/${cls.capacity})`}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Register View (Conditional) */}
+                                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${openRegisterId === cls.id ? 'opacity-100 lg:w-1/3 max-h-[400px] lg:max-h-full mt-4 lg:mt-0' : 'opacity-0 w-0 max-h-0'}`}>
+                                                <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-inner overflow-y-auto h-full max-h-[400px]">
+                                                    <h3 className="font-semibold text-gray-700 mb-3 text-sm">Registered ({registrations[cls.id]?.length || 0}):</h3>
+                                                    {registrations[cls.id]?.length > 0 ? (
+                                                        <ul className="space-y-2">{registrations[cls.id].map(reg => (
+                                                            <li key={reg.bookingId} className="p-2 rounded-md bg-white border border-gray-200 text-xs">
+                                                                <span className="block font-medium text-gray-800">{reg.name}</span>
+                                                                <span className="text-gray-500 block">{reg.email}</span>
+                                                                <span className="text-gray-500 block">{reg.phone}</span>
+                                                            </li>
+                                                        ))}</ul>
+                                                    ) : <p className="text-xs text-gray-500 italic">No participants registered yet.</p>}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </section>
-                            ))}
+                                    </section>
+                                ))
+                            )}
                         </div>
                     ) : (
-                        <div className="mx-auto max-w-3xl p-6 bg-white rounded-xl shadow-lg border border-green-200">
-                            <Calendar onChange={handleCalendarChange} value={calendarDate} tileContent={tileContent} className="rounded-lg" />                            <div className="mt-6">
-                                <h3 className="text-xl font-semibold text-[#2e7d6f] mb-4">Classes on {calendarDate.toDateString()}</h3>
-                                {classesOnDate(calendarDate).length === 0 ? <p className="text-gray-500">No classes scheduled.</p> : classesOnDate(calendarDate).map(cls => (
-                                    <div key={cls.id} className="bg-green-50 rounded-lg p-4 mb-2 border">
-                                        <h4 className="font-semibold">{cls.title}</h4>
-                                        <button onClick={() => deleteClass(cls.id)} className="text-sm bg-red-200 px-3 py-1 rounded">Delete</button>
-                                    </div>
-                                ))}
+                        // Calendar View
+                        <div className="mx-auto max-w-3xl p-4 sm:p-6 bg-white rounded-xl shadow-lg border border-green-100">
+                            <Calendar
+                                onChange={handleCalendarChange}
+                                value={calendarDate}
+                                tileContent={tileContent}
+                                className="border-0 rounded-lg" // Remove default border
+                            />
+                            <div className="mt-6">
+                                <h3 className="text-xl font-semibold text-[#2e7d6f] mb-4 border-b pb-2">
+                                    Classes on {calendarDate.toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' })}
+                                </h3>
+                                {classesOnDate(calendarDate).length === 0 ? (
+                                    <p className="text-gray-500 text-sm italic">No classes scheduled.</p>
+                                ) : (
+                                    classesOnDate(calendarDate).map(cls => (
+                                        <div key={cls.id} className="bg-green-50 rounded-lg p-3 mb-3 border border-green-100 flex justify-between items-center">
+                                            <div>
+                                                <h4 className="font-semibold text-sm text-green-800">{cls.title}</h4>
+                                                <p className="text-xs text-gray-600">{cls.time} ({cls.duration} mins) - {cls.currentBookings}/{cls.capacity} booked</p>
+                                            </div>
+                                            <div className='flex gap-2'>
+                                                <button onClick={() => startEdit(cls)} className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200">Edit</button>
+                                                <button onClick={() => deleteClass(cls.id)} className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200">Delete</button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     )}
                 </div>
             </main>
             <Footer />
+            {/* Global styles specific to this page */}
             <style jsx global>{`
-                .react-calendar { width: 100% !important; border: none; font-family: Inter, system-ui; }
-                .react-calendar__navigation button { color: #2e7d6f; font-weight: 600; }
-                .react-calendar__tile { border-radius: 0.5rem; }
-                .react-calendar__tile:hover { background-color: #d1f0e5; }
+                /* Calendar specific styles */
+                .react-calendar { width: 100% !important; border: none; font-family: inherit; }
+                .react-calendar__navigation button { color: #2e7d6f; font-weight: 600; border-radius: 0.375rem; }
+                .react-calendar__navigation button:hover { background-color: #e6f4f1; }
+                .react-calendar__month-view__weekdays__weekday { font-size: 0.75rem; font-weight: 500; text-transform: uppercase; color: #555; }
+                .react-calendar__tile { border-radius: 0.375rem; padding: 0.75em 0.5em; /* Adjust padding if needed */ }
+                .react-calendar__tile:enabled:hover,
+                .react-calendar__tile:enabled:focus { background-color: #d1f0e5; }
+                .react-calendar__tile--now { background: #e6f4f1; }
+                .react-calendar__tile--now:enabled:hover,
+                .react-calendar__tile--now:enabled:focus { background: #c1e8dc; }
                 .react-calendar__tile--active { background-color: #2e7d6f !important; color: white !important; }
+                .react-calendar__tile--hasActive { background-color: #a6d9cf !important; } /* Range selection color */
             `}</style>
         </div>
     );
