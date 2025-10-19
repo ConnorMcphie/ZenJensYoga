@@ -1,7 +1,6 @@
-// File: app/checkout/ClientCheckoutPage.tsx
 "use client"; // Keep this directive here
 
-import { useEffect, useState, Suspense } from "react"; // Import Suspense here if needed for nested components, though not strictly needed for the hook itself
+import { useEffect, useState } from "react"; // Import Suspense here if needed for nested components, though not strictly needed for the hook itself
 import { useSearchParams } from 'next/navigation';
 import Link from "next/link";
 
@@ -17,11 +16,8 @@ export default function ClientCheckoutPage() { // Renamed component
         } else if (searchParams.get('canceled')) {
             setStatus('canceled');
         } else {
-            // If neither parameter is present, maybe default to loading or an error/redirect state?
-            // For now, let's keep the loading state until params are checked.
-            // If the params might take time to appear, ensure loading state handles this.
-            setStatus('loading'); // Explicitly set loading if no params found initially
-            // Consider adding a timeout or condition if params never arrive.
+
+            setStatus('loading');
         }
     }, [searchParams]); // Dependency array is correct
 
