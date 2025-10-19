@@ -1,6 +1,6 @@
-// File: app/checkout/page.tsx
+// File: app/checkout/ClientCheckoutPage.tsx
 import { Suspense } from 'react';
-import ClientCheckoutPage from "./ClientCheckoutPage/page"; // Import the component we just created
+import ClientCheckoutPage from "./ClientCheckoutPage"; // Import the component we just created
 
 // Define a simple loading component to show while Suspense is waiting
 function LoadingFallback() {
