@@ -30,7 +30,7 @@ export default function Home() {
     useEffect(()=> {
         const randomIndex = Math.floor(Math.random() * quotes.length);
         setQuote(quotes[randomIndex]);
-    }, [quotes]);
+    }, []);
 
     const Map = useMemo(() => dynamic(() => import("@/components/Map"), { ssr: false }), []);
 
