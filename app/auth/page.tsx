@@ -66,6 +66,11 @@ export default function AuthPage() {
             setError('Passwords do not match');
             return;
         }
+        if (signupForm.password.length < 6) {
+            setError('Password must be at least 6 characters');
+            return;
+        }
+
 
         setLoading(true);
 
@@ -76,24 +81,38 @@ export default function AuthPage() {
                 body: JSON.stringify(signupForm),
             });
 
-            const newUser = await res.json();
-
-            if (!res.ok) {
-                setError(newUser.message || 'Account creation failed');
-                return;
+            // Try to parse the response body as JSON regardless of status
+            // This allows us to get the error message from the backend
+            let responseData;
+            try {
+                responseData = await res.json();
+            } catch (jsonError) {
+                // If parsing fails even after backend changes, throw a clearer error
+                throw new Error(`Server sent an invalid response. Status: ${res.status}`);
             }
+
+
+            // Check if the response status indicates success (e.g., 200 OK or 201 Created)
+            if (!res.ok) {
+                // Throw an error using the message from the parsed JSON response
+                throw new Error(responseData.message || `Signup failed with status: ${res.status}`);
+            }
+
+            // If we reach here, res.ok was true and responseData contains the new user info
+            const newUser = responseData;
 
             localStorage.setItem('user', JSON.stringify(newUser));
             router.push('/booking');
 
-        } catch (error: unknown) { // Changed to unknown
-            console.error('Signup error:', error);
-            const message = error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.';
+        } catch (error: unknown) {
+            console.error('Signup fetch/processing error:', error); // Log the caught error
+            const message = error instanceof Error ? error.message : 'An unexpected error occurred during signup.';
             setError(message);
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="flex flex-col min-h-screen bg-[#f0fdf4]">
