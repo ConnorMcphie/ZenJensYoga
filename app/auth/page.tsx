@@ -34,31 +34,44 @@ export default function AuthPage() {
         setLoading(true);
 
         try {
-            const res = await fetch('/api/auth/login', {
+            const res = await fetch('/api/auth/login', { // Ensure this path matches your API route
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(loginForm),
             });
 
-            const user = await res.json();
-
-            if (!res.ok) {
-                setError(user.message || 'Invalid email or password');
-                return;
+            // Try to parse the response body as JSON regardless of status
+            let responseData;
+            try {
+                responseData = await res.json();
+            } catch (jsonError) {
+                // If parsing fails (e.g., 405 error before backend fix)
+                throw new Error(`Server responded unexpectedly. Status: ${res.status}`);
             }
 
+            // Check if the response status indicates success (200 OK)
+            if (!res.ok) {
+                // Throw an error using the message from the parsed JSON response
+                throw new Error(responseData.message || `Login failed with status: ${res.status}`);
+            }
+
+            // If we reach here, login was successful, responseData contains user info
+            const user = responseData;
+
+            // Store user data (excluding password which shouldn't be sent anyway)
             localStorage.setItem('user', JSON.stringify(user));
+
+            // Redirect based on admin status
             router.push(user.is_admin ? '/admin/dashboard' : '/booking');
 
-        } catch (error: unknown) { // Changed to unknown
-            console.error('Login error:', error);
-            const message = error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.';
+        } catch (error: unknown) {
+            console.error('Login error:', error); // Keep this log
+            const message = error instanceof Error ? error.message : 'An unexpected error occurred during login.';
             setError(message);
         } finally {
             setLoading(false);
         }
     };
-
     const handleSignUp = async () => {
         setError('');
 
