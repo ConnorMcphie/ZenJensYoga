@@ -92,7 +92,7 @@ export default function Navbar() {
                       className="block text-[#2e7d6f] font-medium hover:text-[#004d40] transition-colors">
                     Contact
                 </Link>
-                <Link href="/find-us" onClick={() => setOpen(false)}
+                {/*<Link href="/find-us" onClick={() => setOpen(false)}
                       className="block text-[#2e7d6f] font-medium hover:text-[#004d40] transition-colors">
                     Find Us
                 </Link>
@@ -103,7 +103,7 @@ export default function Navbar() {
                 <Link href="/faq" onClick={() => setOpen(false)}
                       className="block text-[#2e7d6f] font-medium hover:text-[#004d40] transition-colors">
                     FAQ
-                </Link>
+                </Link>*/}
                 <Link href="/booking" onClick={() => setOpen(false)}>
                     <button
                         className="w-full bg-[#81c784] hover:bg-[#66bb6a] text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300">
