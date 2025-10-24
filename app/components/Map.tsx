@@ -5,7 +5,6 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import {memo} from 'react'
 
-// Fix default marker icon issue in Next.js
 
 L.Icon.Default.mergeOptions({
     iconUrl: "/marker-icon.png",
@@ -25,8 +24,7 @@ L.Icon.Default.mergeOptions({
                 />
                 <Marker position={position}>
                     <Popup>
-                        Zen Jens Yoga Studio<br />59 Kew Gardens, Uddingston, G71 6LT
-                    </Popup>
+                        Viewpark Community Centre<br />Old Edinburgh Rd, Uddingston, G71 6PG                    </Popup>
                 </Marker>
             </MapContainer>
         </div>

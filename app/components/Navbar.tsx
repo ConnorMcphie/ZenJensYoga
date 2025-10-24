@@ -20,14 +20,17 @@ export default function Navbar() {
     return (
         <nav className="sticky top-0 z-50 bg-[#d0f2e6]  shadow-md px-6 py-4">
             <div className="max-w-6xl mx-auto flex justify-between items-center">
-                {/* Brand */}
-                <h1 className="text-2xl font-bold text-[#2e7d6f]">Zen Jen’s Yoga</h1>
+                {/* Brand - NOW WITH PLAYFAIR DISPLAY FONT */}
+                <h1 className="text-3xl font-bold text-[#2e7d6f] font-playfair-manual">Zen Jen&#39;s Yoga</h1>
 
                 {/* Desktop menu */}
                 <ul className="hidden md:flex space-x-6 text-[#2e7d6f] font-medium items-center">
                     <li><Link href="/" className="hover:text-[#004d40] transition-colors">Home</Link></li>
                     <li><Link href="/about" className="hover:text-[#004d40] transition-colors">About</Link></li>
                     <li><Link href="/contact" className="hover:text-[#004d40] transition-colors">Contact</Link></li>
+                    <li><Link href="/find-us" className="hover:text-[#004d40] transition-colors">Find Us</Link></li>
+                    <li><Link href="/gallery" className="hover:text-[#004d40] transition-colors">Gallery</Link></li>
+                    <li><Link href="/faq" className="hover:text-[#004d40] transition-colors">FAQ</Link></li>
                     <li>
                         <Link href="/booking">
                             <button
@@ -54,16 +57,11 @@ export default function Navbar() {
                         {open ? (
                             <>
                                 {/* Warrior II pose using minimalist straight lines */}
-                                <line x1="100" y1="60" x2="100" y2="120"/>
-                                {/* Torso */}
-                                <line x1="40" y1="90" x2="160" y2="90"/>
-                                {/* Arms */}
-                                <line x1="100" y1="120" x2="70" y2="160"/>
-                                {/* Left leg bent */}
-                                <line x1="70" y1="160" x2="60" y2="160"/>
-                                {/* Foot */}
-                                <line x1="100" y1="120" x2="140" y2="160"/>
-                                {/* Right leg straight */}
+                                <line x1="100" y1="60" x2="100" y2="120"/> {/* Torso */}
+                                <line x1="40" y1="90" x2="160" y2="90"/> {/* Arms */}
+                                <line x1="100" y1="120" x2="70" y2="160"/> {/* Left leg bent */}
+                                <line x1="70" y1="160" x2="60" y2="160"/> {/* Foot */}
+                                <line x1="100" y1="120" x2="140" y2="160"/> {/* Right leg straight */}
                             </>
                         ) : (
                             <>
@@ -86,13 +84,25 @@ export default function Navbar() {
                       className="block text-[#2e7d6f] font-medium hover:text-[#004d40] transition-colors">
                     Home
                 </Link>
-                <Link href="/app/about" onClick={() => setOpen(false)}
+                <Link href="/about" onClick={() => setOpen(false)}
                       className="block text-[#2e7d6f] font-medium hover:text-[#004d40] transition-colors">
                     About
                 </Link>
                 <Link href="/contact" onClick={() => setOpen(false)}
                       className="block text-[#2e7d6f] font-medium hover:text-[#004d40] transition-colors">
                     Contact
+                </Link>
+                <Link href="/find-us" onClick={() => setOpen(false)}
+                      className="block text-[#2e7d6f] font-medium hover:text-[#004d40] transition-colors">
+                    Find Us
+                </Link>
+                <Link href="/gallery" onClick={() => setOpen(false)}
+                      className="block text-[#2e7d6f] font-medium hover:text-[#004d40] transition-colors">
+                    Gallery
+                </Link>
+                <Link href="/faq" onClick={() => setOpen(false)}
+                      className="block text-[#2e7d6f] font-medium hover:text-[#004d40] transition-colors">
+                    FAQ
                 </Link>
                 <Link href="/booking" onClick={() => setOpen(false)}>
                     <button

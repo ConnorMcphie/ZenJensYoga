@@ -2,7 +2,7 @@
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useState } from "react";
+import React, { useState } from "react";
 
 export default function ContactPage() {
     const [form, setForm] = useState({ name: '', email: '', message: '' });
@@ -90,8 +90,7 @@ export default function ContactPage() {
                     <div className="mt-10 text-gray-700 space-y-2">
                         <p><strong>Email:</strong> zenjensyoga21@gmail.com</p>
                         <p><strong>Phone:</strong> +44 7731 943405</p>
-                        <p><strong>Location:</strong>  59 Kew Gardens, Uddingston, G71 6LT </p>
-                    </div>
+                        <p><strong>Location:</strong> Viewpark Community Centre, Old Edinburgh Rd, Uddingston, G71 6PG</p>                    </div>
                 </div>
             </main>
 

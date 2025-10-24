@@ -2,10 +2,9 @@
 
 import Image from "next/image";
 import{useEffect, useState} from "react";
-import dynamic from "next/dynamic";
-import { useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Link from "next/link";
 
 
 const quotes =[
@@ -32,7 +31,6 @@ export default function Home() {
         setQuote(quotes[randomIndex]);
     }, []);
 
-    const Map = useMemo(() => dynamic(() => import("@/components/Map"), { ssr: false }), []);
 
     return (
         <>
@@ -61,7 +59,7 @@ export default function Home() {
 
                                 {/* Text Section */}
                                 <div className="w-full md:w-2/3 flex flex-col justify-center">
-                                    <h2 className="text-4xl font-bold text-[#2e7d6f] mb-6">About Us</h2>
+                                    <h1 className=" font-bold text-[#2e7d6f] mb-6">Contemporary yoga classes in Bothell / Uddingston </h1>
 
                                     {/* Intro section */}
                                     <div className="space-y-4 text-lg text-gray-700 leading-relaxed">
@@ -96,14 +94,17 @@ export default function Home() {
 
                             </section>
 
-                            {/* book now Section */}
-
-                            {/* Map Section */}
-                            <section>
-                                <h2 className="text-2xl font-bold text-[#004d40] mb-6">Find Us</h2>
-                                <div className="w-full fla">
-                                    <Map/>
-                                </div>
+                            {/* Find Us Section (Replaced Map) */}
+                            <section className="text-center bg-white rounded-xl shadow-md p-8 border border-green-100">
+                                <h2 className="text-2xl font-bold text-[#004d40] mb-4">Come and find us!</h2>
+                                <p className="text-lg text-gray-700 mb-6">
+                                    Classes are held at the Viewpark Community Centre in Uddingston.
+                                </p>
+                                <Link href="/find-us">
+                                    <span className="bg-[#81c784] hover:bg-[#66bb6a] text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors duration-300">
+                                        View Map & Location
+                                    </span>
+                                </Link>
                             </section>
 
                         </div>
