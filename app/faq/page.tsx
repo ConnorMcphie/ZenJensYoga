@@ -13,21 +13,10 @@ type FaqItem = {
 // Add your questions and answers here
 const faqData: FaqItem[] = [
     {
-        question: "What should I bring to my first class?",
-        answer: "Please bring your own yoga mat, a water bottle, and wear comfortable clothing you can move in. We recommend layers, as you'll warm up during the class and cool down during relaxation."
+        question: "first question",
+        answer: "answer to first question."
     },
-    {
-        question: "I'm a complete beginner, can I still join?",
-        answer: "Absolutely! All our classes are suitable for all levels, including beginners. Jen provides modifications and guidance for everyone, ensuring you can practice safely and comfortably."
-    },
-    {
-        question: "What is your cancellation policy?",
-        answer: "All bookings are non-refundable. However, you may reschedule your session up to 24 hours before the class start time, subject to availability. Cancellations or reschedules cannot be made within 24 hours of the class."
-    },
-    {
-        question: "Where are the classes held?",
-        answer: "Our classes are held at the Viewpark Community Centre, Old Edinburgh Rd, Uddingston, Glasgow, G71 6PG. You can find a map on our 'Find Us' page."
-    }
+
 ];
 
 // Reusable component for the accordion item
