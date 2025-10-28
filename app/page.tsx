@@ -47,7 +47,8 @@ export default function Home() {
                         <div className="space-y-10">
 
                             <div
-                                className="border-l-4 border-[#2e7d6f] bg-[#e6f4f1] p-6 italic text-center text-lg text-gray-700 max-w-3xl mx-auto shadow-sm rounded-md mb-10">
+                                className="border-l-4 border-[#2e7d6f] bg-[#e6f4f1] p-6 italic text-center text-lg
+                                        text-gray-700 max-w-3xl mx-auto shadow-sm rounded-md mb-10">
                                 “{quote}”
                             </div>
 
@@ -58,7 +59,7 @@ export default function Home() {
 
 
                                 {/* Text Section */}
-                                <div className="w-full md:w-2/3 flex flex-col justify-center">
+                                <div className="w-full md:w-1/2 flex flex-col justify-center">
                                     <h1 className=" font-bold text-[#2e7d6f] mb-6">Contemporary yoga classes in Bothell / Uddingston </h1>
 
                                     {/* Intro section */}
@@ -80,13 +81,13 @@ export default function Home() {
                                 </div>
 
                                 {/* Image Section */}
-                                <div className="w-full md:w-1/3 flex justify-center items-center">
-                                    <div className="overflow-hidden rounded-xl shadow-lg aspect-[4/3] w-full">
+                                <div className="w-full md:w-1/2 flex justify-center items-center">
+                                    <div className="overflow-hidden rounded-xl shadow-lg  w-full">
                                         <Image
                                             src="/portraitwithTree.jpg"
                                             alt="Yoga class"
                                             width={500}
-                                            height={300}
+                                            height={500}
                                             className="object-cover w-full h-full "
                                         />
                                     </div>
