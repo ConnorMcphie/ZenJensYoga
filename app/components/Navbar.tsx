@@ -28,9 +28,9 @@ export default function Navbar() {
                     <li><Link href="/" className="hover:text-[#004d40] transition-colors">Home</Link></li>
                     <li><Link href="/about" className="hover:text-[#004d40] transition-colors">About</Link></li>
                     <li><Link href="/contact" className="hover:text-[#004d40] transition-colors">Contact</Link></li>
-                    {/*<li><Link href="/find-us" className="hover:text-[#004d40] transition-colors">Find Us</Link></li>
+                    {/*<li><Link href="/find-us" className="hover:text-[#004d40] transition-colors">Find Us</Link></li>*/}
                     <li><Link href="/gallery" className="hover:text-[#004d40] transition-colors">Gallery</Link></li>
-                    <li><Link href="/faq" className="hover:text-[#004d40] transition-colors">FAQ</Link></li>*/}
+                    {/* <li><Link href="/faq" className="hover:text-[#004d40] transition-colors">FAQ</Link></li>*/}
                     <li>
                         <Link href="/booking">
                             <button
@@ -92,15 +92,15 @@ export default function Navbar() {
                       className="block text-[#2e7d6f] font-medium hover:text-[#004d40] transition-colors">
                     Contact
                 </Link>
-                {/*<Link href="/find-us" onClick={() => setOpen(false)}
+                {/* <Link href="/find-us" onClick={() => setOpen(false)}
                       className="block text-[#2e7d6f] font-medium hover:text-[#004d40] transition-colors">
                     Find Us
-                </Link>
+                </Link>*/}
                 <Link href="/gallery" onClick={() => setOpen(false)}
                       className="block text-[#2e7d6f] font-medium hover:text-[#004d40] transition-colors">
                     Gallery
                 </Link>
-                <Link href="/faq" onClick={() => setOpen(false)}
+                {/*<Link href="/faq" onClick={() => setOpen(false)}
                       className="block text-[#2e7d6f] font-medium hover:text-[#004d40] transition-colors">
                     FAQ
                 </Link>*/}
