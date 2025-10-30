@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
     title: "Zenjensyoga",
     description: "Zen Jens Yoga offers easy online booking for yoga classes. Come along to improve flexibility, mindfulness, and overall health!",
+    icons: {
+        icon: 'Tab_Icon.png',
+    },
 };
 
 export default function RootLayout({
