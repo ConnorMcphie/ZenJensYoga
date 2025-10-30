@@ -21,7 +21,7 @@ export default function Navbar() {
         <nav className="sticky top-0 z-50 bg-[#d0f2e6]  shadow-md px-6 py-4">
             <div className="max-w-6xl mx-auto flex justify-between items-center">
                 {/* Brand - NOW WITH PLAYFAIR DISPLAY FONT */}
-                <h1 className="text-3xl font-bold text-[#2e7d6f] font-playfair-manual">Zen Jen&#39;s Yoga</h1>
+                <h1 className="text-3xl  text-[#2e7d6f] font-cinzel-manual">Zen Jen&#39;s Yoga</h1>
 
                 {/* Desktop menu */}
                 <ul className="hidden md:flex space-x-6 text-[#2e7d6f] font-medium items-center">
