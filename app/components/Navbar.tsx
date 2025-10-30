@@ -20,7 +20,6 @@ export default function Navbar() {
     return (
         <nav className="sticky top-0 z-50 bg-[#d0f2e6]  shadow-md px-6 py-4">
             <div className="max-w-6xl mx-auto flex justify-between items-center">
-                {/* Brand - NOW WITH PLAYFAIR DISPLAY FONT */}
                 <h1 className="text-3xl  text-[#2e7d6f] font-cinzel-manual">Zen Jen&#39;s Yoga</h1>
 
                 {/* Desktop menu */}
@@ -30,7 +29,7 @@ export default function Navbar() {
                     <li><Link href="/contact" className="hover:text-[#004d40] transition-colors">Contact</Link></li>
                     {/*<li><Link href="/find-us" className="hover:text-[#004d40] transition-colors">Find Us</Link></li>*/}
                     <li><Link href="/gallery" className="hover:text-[#004d40] transition-colors">Gallery</Link></li>
-                    {/* <li><Link href="/faq" className="hover:text-[#004d40] transition-colors">FAQ</Link></li>*/}
+                     <li><Link href="/faq" className="hover:text-[#004d40] transition-colors">FAQ</Link></li>
                     <li>
                         <Link href="/booking">
                             <button
@@ -100,10 +99,10 @@ export default function Navbar() {
                       className="block text-[#2e7d6f] font-medium hover:text-[#004d40] transition-colors">
                     Gallery
                 </Link>
-                {/*<Link href="/faq" onClick={() => setOpen(false)}
+                <Link href="/faq" onClick={() => setOpen(false)}
                       className="block text-[#2e7d6f] font-medium hover:text-[#004d40] transition-colors">
                     FAQ
-                </Link>*/}
+                </Link>
                 <Link href="/booking" onClick={() => setOpen(false)}>
                     <button
                         className="w-full bg-[#81c784] hover:bg-[#66bb6a] text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300">
