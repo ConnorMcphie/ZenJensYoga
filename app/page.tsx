@@ -41,26 +41,27 @@ export default function Home() {
 
 
                 {/* Main Content */}
-                <main className="flex-1 px-6 py-12 bg-gradient-to-b from-[#d1f0e5] to-white">
+                <main className="flex-1 px-6 py-12 bg-black/50 bg-[url('/Forrest-Bg2.jpg')] bg-blend-multiply bg-cover bg-center bg-fixed">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
 
                         <div className="space-y-10">
 
+                            {/* --- II. QUOTE BLOCK STYLE IMPROVEMENT --- */}
                             <div
-                                className="border-l-4 border-[#2e7d6f] bg-[#e6f4f1] p-6 italic text-center text-lg
-                                        text-gray-700 max-w-3xl mx-auto shadow-sm rounded-md mb-10">
+                                className="bg-[#ecfdf5] p-6 italic text-center text-lg
+                                        text-gray-700 max-w-3xl mx-auto shadow-xl rounded-xl mb-10 border border-green-200"> {/* Soft green BG, stronger shadow, rounded corners */}
                                 “{quote}”
                             </div>
 
 
                             {/* about + Image Section */}
                             <section
-                                className="flex flex-col md:flex-row gap-8 bg-white rounded-xl shadow-md p-8 border border-green-100">
-
+                                className="flex flex-col md:flex-row gap-8 bg-white rounded-xl shadow-xl p-8 border border-green-100">
 
                                 {/* Text Section */}
                                 <div className="w-full md:w-1/2 flex flex-col justify-center">
-                                    <h1 className=" font-bold text-[#2e7d6f] mb-6">Contemporary yoga classes in Bothell / Uddingston </h1>
+                                    {/* --- III. TYPOGRAPHY HIERARCHY IMPROVEMENT --- */}
+                                    <h1 className="text-2xl font-bold text-[#2e7d6f] mb-6">Contemporary yoga classes in Bothell / Uddingston </h1>
 
                                     {/* Intro section */}
                                     <div className="space-y-4 text-lg text-gray-700 leading-relaxed">
@@ -96,7 +97,7 @@ export default function Home() {
                             </section>
 
                             {/* Find Us Section (Replaced Map) */}
-                            <section className="text-center bg-white rounded-xl shadow-md p-8 border border-green-100">
+                            <section className="text-center bg-white rounded-xl shadow-xl p-8 border border-green-100">
                                 <h2 className="text-2xl font-bold text-[#004d40] mb-4">Come and find us!</h2>
                                 <p className="text-lg text-gray-700 mb-6">
                                     Classes are held at the Viewpark Community Centre in Uddingston.
@@ -112,7 +113,6 @@ export default function Home() {
                     </div>
                 </main>
 
-                {/* Footer */}
                 <Footer/>
 
             </div>
