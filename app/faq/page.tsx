@@ -29,15 +29,15 @@ const faqData: FaqItem[] = [
         answer: "Yoga is a practice - it is not about the perfect pose it is about how it feels - and that is very personal. It's like any exercise, the more you do the better you will get to know and appreciate your body and the better it will respond. I can advise on correct alignment in the class and offer adjustments and alternatives - we can find a way! If you have any health concerns then you should always consult a Doctor before coming to class.",
     },
     {
-        question: "CAN I COME BY MYSELF TO CLASS?",
+        question: "Can I come by myself to class?",
         answer: "Yes, and most people do. It can feel a little daunting to come alone on the first night but it is a very welcoming class and a good way to meet like minded people. Alone or with a friend you can’t really have a conversation during the class so it doesn't matter.",
     },
     {
-        question: "HOW DO I BOOK/ CHANGE A DATE?",
+        question: "How do I book/ change a date?",
         answer: "Booking is via the link. Classes are non-refundable but can be rebooked for a more convenient time 24 hours before the class begins. If the class is full I can add you to a waiting list - just get in touch.",
     },
     {
-        question: "IS THERE PARKING?",
+        question: "Is there parking?",
         answer: "There is a large carpark in front of the community centre.",
     },
 ];
