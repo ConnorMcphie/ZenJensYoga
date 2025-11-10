@@ -133,27 +133,26 @@ export default function AdminDashboard() {
         checkAdmin();
     }, [router]);
 
-    // *** CHANGES: Create memoized lists for upcoming and past classes ***
-    const now = new Date(); // This is recalculated on every render
+    // *** CHANGES: 'now' is moved INSIDE the useMemo hooks ***
     const upcomingClasses = useMemo(
         () => {
-            // We use 'now' from the closure, so it must be a dependency.
+            const now = new Date(); // <-- 'now' is defined inside
             return classes.filter(c => {
                 const classDateTime = new Date(`${c.date}T${c.time || '00:00:00'}`);
                 return classDateTime >= now;
             });
         },
-        [classes, now] // <-- ADDED 'now'
+        [classes] // <-- Dependency array only contains 'classes'
     );
     const pastClasses = useMemo(
         () => {
-            // We use 'now' from the closure, so it must be a dependency.
+            const now = new Date(); // <-- 'now' is defined inside
             return classes.filter(c => {
                 const classDateTime = new Date(`${c.date}T${c.time || '00:00:00'}`);
                 return classDateTime < now;
             }).reverse(); // Show most recent past classes first
         },
-        [classes, now] // <-- ADDED 'now'
+        [classes] // <-- Dependency array only contains 'classes'
     );
     // *** END CHANGES ***
 
