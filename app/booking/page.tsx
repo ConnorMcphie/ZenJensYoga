@@ -111,7 +111,16 @@ export default function BookingPage() {
                 return; // Stop execution
             }
 
-            setClasses(classesData.map(cls => ({
+            // *** CHANGE: Filter out past classes ***
+            const now = new Date();
+            const upcomingClassesData = classesData.filter(cls => {
+                const classDateTime = new Date(`${cls.date}T${cls.time || '00:00:00'}`);
+                return classDateTime >= now;
+            });
+            // *** END CHANGE ***
+
+
+            setClasses(upcomingClassesData.map(cls => ({ // Use upcomingClassesData
                 ...cls,
                 // Ensure spaces_left is calculated correctly even if bookings_count is null/undefined
                 spaces_left: cls.capacity - (cls.bookings_count || 0),
@@ -316,16 +325,16 @@ export default function BookingPage() {
                 .react-calendar__tile--active {
                     background-color: #2e7d6f !important; /* Main green for active */
                     color: white !important;
-                     border-radius: 0.375rem;
+                    border-radius: 0.375rem;
                 }
-                 .react-calendar__tile--now {
+                .react-calendar__tile--now {
                     background: #e6f4f1; /* Lighter green for today */
-                     border-radius: 0.375rem;
+                    border-radius: 0.375rem;
                 }
-                 .react-calendar__tile--now:enabled:hover,
-                 .react-calendar__tile--now:enabled:focus {
-                     background: #c1e8dc;
-                 }
+                .react-calendar__tile--now:enabled:hover,
+                .react-calendar__tile--now:enabled:focus {
+                    background: #c1e8dc;
+                }
             `}</style>
         </div>
     );

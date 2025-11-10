@@ -83,19 +83,21 @@ export default function AdminDashboard() {
                 .select('*')
                 .order('date', { ascending: true });
 
-            if (classErr) throw classErr;
-
-            const mappedData: ClassItem[] = classesData.map((c) => ({
-                ...c,
-                capacity: Number(c.capacity ?? 0),
-                price: c.price != null ? Number(c.price) : null,
-                duration: c.duration != null ? Number(c.duration) : null,
-                currentBookings: Number(c.bookings_count ?? 0),
-                spaces_left: Number(c.capacity ?? 0) - Number(c.bookings_count ?? 0),
-            }));
-            setClasses(mappedData);
+            if (classErr) {
+                console.error('Error fetching classes:', classErr);
+            } else {
+                const mappedData: ClassItem[] = classesData.map((c) => ({
+                    ...c,
+                    capacity: Number(c.capacity ?? 0),
+                    price: c.price != null ? Number(c.price) : null,
+                    duration: c.duration != null ? Number(c.duration) : null,
+                    currentBookings: Number(c.bookings_count ?? 0),
+                    spaces_left: Number(c.capacity ?? 0) - Number(c.bookings_count ?? 0),
+                }));
+                setClasses(mappedData);
+            }
         } catch (e) {
-            console.error('Error fetching classes:', e);
+            console.error('Error processing class data:', e);
         } finally {
             setLoading(false);
         }
@@ -130,6 +132,30 @@ export default function AdminDashboard() {
         };
         checkAdmin();
     }, [router]);
+
+    // *** CHANGES: Create memoized lists for upcoming and past classes ***
+    const now = new Date(); // This is recalculated on every render
+    const upcomingClasses = useMemo(
+        () => {
+            // We use 'now' from the closure, so it must be a dependency.
+            return classes.filter(c => {
+                const classDateTime = new Date(`${c.date}T${c.time || '00:00:00'}`);
+                return classDateTime >= now;
+            });
+        },
+        [classes, now] // <-- ADDED 'now'
+    );
+    const pastClasses = useMemo(
+        () => {
+            // We use 'now' from the closure, so it must be a dependency.
+            return classes.filter(c => {
+                const classDateTime = new Date(`${c.date}T${c.time || '00:00:00'}`);
+                return classDateTime < now;
+            }).reverse(); // Show most recent past classes first
+        },
+        [classes, now] // <-- ADDED 'now'
+    );
+    // *** END CHANGES ***
 
     const createClass = async () => {
         if (!formData.title || !formData.date || !formData.time) {
@@ -220,11 +246,16 @@ export default function AdminDashboard() {
                 body: JSON.stringify({ classId }),
             });
             const { error } = await supabase.from('classes').delete().eq('id', classId);
-            if (error) throw error;
-            alert('Class cancelled and participants notified.');
-            fetchClasses();
+
+            if (error) {
+                console.error(error);
+                alert('Failed to cancel class: ' + error.message);
+            } else {
+                alert('Class cancelled and participants notified.');
+                fetchClasses();
+            }
         } catch (err) {
-            console.error(err);
+            console.error('Error during cancellation process:', err);
             alert('Failed to cancel class or send notifications.');
         }
     };
@@ -272,11 +303,13 @@ export default function AdminDashboard() {
         setOpenRegisterId(classId);
     };
 
+    // This uses ALL classes, which is correct for the admin calendar view
     const classesOnDate = useMemo(
         () => (d: Date) => classes.filter((c) => new Date(c.date).toDateString() === d.toDateString()),
         [classes]
     );
 
+    // This uses ALL classes, which is correct for the admin calendar view
     const tileContent = ({ date, view }: { date: Date; view: string }) => {
         if (view !== 'month') return null;
         const has = classes.some((c) => new Date(c.date).toDateString() === date.toDateString());
@@ -285,7 +318,7 @@ export default function AdminDashboard() {
 
     // FIX: Update function signature with correct types
     const handleCalendarChange = (value: CalendarValue, _event: MouseEvent<HTMLButtonElement>) => { // Added underscore
-           const newDate = Array.isArray(value) ? value[0] : value;
+        const newDate = Array.isArray(value) ? value[0] : value;
         if (newDate instanceof Date) { // Check if it's a valid Date object
             setCalendarDate(newDate);
         } else if (newDate === null) {
@@ -320,6 +353,74 @@ export default function AdminDashboard() {
             </div>
         );
     }
+
+    // *** CHANGE: Reusable card component for class list ***
+    const ClassListCard = ({ cls, isHistory = false }: { cls: ClassItem; isHistory?: boolean }) => (
+        <section key={cls.id} className={`bg-white rounded-xl shadow-md border ${isHistory ? 'border-gray-200 opacity-80' : 'border-green-100'} p-4 sm:p-6 transition-all duration-300 ease-in-out`}>
+            <div className="flex flex-col lg:flex-row gap-4">
+                {/* Class Details / Edit Form */}
+                <div className={`${openRegisterId === cls.id ? 'lg:w-2/3' : 'w-full'} space-y-3`}>
+                    {editingId === cls.id ? (
+                        // Edit Form
+                        <div className='space-y-3'>
+                            <h3 className="text-lg font-semibold text-gray-700">Editing Class</h3>
+                            <input type="text" name="title" placeholder='Title *' value={editFormData.title || ''} onChange={handleEditChange} required className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                            <textarea name="description" placeholder='Description' value={editFormData.description || ''} onChange={handleEditChange} rows={3} className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                            <div className='grid grid-cols-2 gap-3'>
+                                <input type="date" name="date" value={editFormData.date || ''} onChange={handleEditChange} required className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                                <input type="time" name="time" value={editFormData.time || ''} onChange={handleEditChange} required className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                                <input type="number" name="capacity" placeholder='Capacity' value={editFormData.capacity ?? ''} onChange={handleEditChange} className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                                <input type="number" name="duration" placeholder='Duration (mins)' value={editFormData.duration ?? ''} onChange={handleEditChange} className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
+                                <input type="number" step="0.01" name="price" placeholder='Price (£)' value={editFormData.price ?? ''} onChange={handleEditChange} className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500 col-span-2" />
+                            </div>
+                            <div className='flex gap-3'>
+                                <button onClick={() => updateClass(cls.id)} className="px-4 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-medium">Save Changes</button>
+                                <button onClick={() => setEditingId(null)} className="px-4 py-1.5 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm">Cancel</button>
+                            </div>
+                        </div>
+                    ) : (
+                        // Display Class Details
+                        <div>
+                            <h2 className={`text-xl font-semibold ${isHistory ? 'text-gray-600' : 'text-green-800'}`}>{cls.title}</h2>
+                            <p className="text-sm text-gray-600 italic mb-2">{new Date(cls.date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} {cls.time ? `at ${cls.time}` : ''}</p>
+                            <p className="text-gray-700 mt-1 text-sm">{cls.description}</p>
+                            <div className="text-sm mt-2 space-x-4">
+                                <span>Capacity: {cls.capacity}</span>
+                                <span>Duration: {cls.duration} mins</span>
+                                <span>Price: £{cls.price?.toFixed(2)}</span>
+                            </div>
+                            <div className="flex items-center gap-4 pt-3 mt-3 border-t border-gray-100">
+                                {/* Hide Edit/Delete for history, or keep them? Keeping them for now. */}
+                                <button onClick={() => startEdit(cls)} className="text-sm text-blue-600 hover:underline">Edit</button>
+                                <button onClick={() => deleteClass(cls.id)} className="text-sm text-red-600 hover:underline">Delete Class</button>
+                                <button onClick={() => fetchRegister(cls.id)} className={`px-3 py-1.5 border rounded-md hover:bg-green-50 text-xs font-medium ${isHistory ? 'border-gray-400 text-gray-700' : 'border-green-500 text-green-700'}`}>
+                                    {openRegisterId === cls.id ? 'Hide Register' : `View Register (${cls.currentBookings}/${cls.capacity})`}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Register View (Conditional) */}
+                <div className={`transition-all duration-300 ease-in-out overflow-hidden ${openRegisterId === cls.id ? 'opacity-100 lg:w-1/3 max-h-[400px] lg:max-h-full mt-4 lg:mt-0' : 'opacity-0 w-0 max-h-0'}`}>
+                    <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-inner overflow-y-auto h-full max-h-[400px]">
+                        <h3 className="font-semibold text-gray-700 mb-3 text-sm">Registered ({registrations[cls.id]?.length || 0}):</h3>
+                        {registrations[cls.id]?.length > 0 ? (
+                            <ul className="space-y-2">{registrations[cls.id].map(reg => (
+                                <li key={reg.bookingId} className="p-2 rounded-md bg-white border border-gray-200 text-xs">
+                                    <span className="block font-medium text-gray-800">{reg.name}</span>
+                                    <span className="text-gray-500 block">{reg.email}</span>
+                                    <span className="text-gray-500 block">{reg.phone}</span>
+                                </li>
+                            ))}</ul>
+                        ) : <p className="text-xs text-gray-500 italic">No participants registered yet.</p>}
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+    // *** END CARD COMPONENT ***
+
 
     return (
         <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#d1f0e5] to-white">
@@ -371,77 +472,34 @@ export default function AdminDashboard() {
 
                     {/* Class List or Calendar View */}
                     {viewMode === 'list' ? (
-                        <div className="space-y-6">
-                            <h2 className="text-2xl font-semibold text-green-800 border-b pb-2">Manage Classes</h2>
-                            {loading ? (
-                                <p className="text-center text-gray-500">Loading classes...</p>
-                            ) : classes.length === 0 ? (
-                                <p className="text-center text-gray-500 italic">No classes found.</p>
-                            ) : (
-                                classes.map((cls) => (
-                                    <section key={cls.id} className="bg-white rounded-xl shadow-md border border-green-100 p-4 sm:p-6 transition-all duration-300 ease-in-out">
-                                        <div className="flex flex-col lg:flex-row gap-4">
-                                            {/* Class Details / Edit Form */}
-                                            <div className={`${openRegisterId === cls.id ? 'lg:w-2/3' : 'w-full'} space-y-3`}>
-                                                {editingId === cls.id ? (
-                                                    // Edit Form
-                                                    <div className='space-y-3'>
-                                                        <h3 className="text-lg font-semibold text-gray-700">Editing Class</h3>
-                                                        <input type="text" name="title" placeholder='Title *' value={editFormData.title || ''} onChange={handleEditChange} required className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
-                                                        <textarea name="description" placeholder='Description' value={editFormData.description || ''} onChange={handleEditChange} rows={3} className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
-                                                        <div className='grid grid-cols-2 gap-3'>
-                                                            <input type="date" name="date" value={editFormData.date || ''} onChange={handleEditChange} required className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
-                                                            <input type="time" name="time" value={editFormData.time || ''} onChange={handleEditChange} required className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
-                                                            <input type="number" name="capacity" placeholder='Capacity' value={editFormData.capacity ?? ''} onChange={handleEditChange} className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
-                                                            <input type="number" name="duration" placeholder='Duration (mins)' value={editFormData.duration ?? ''} onChange={handleEditChange} className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500" />
-                                                            <input type="number" step="0.01" name="price" placeholder='Price (£)' value={editFormData.price ?? ''} onChange={handleEditChange} className="w-full p-2 border rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500 col-span-2" />
-                                                        </div>
-                                                        <div className='flex gap-3'>
-                                                            <button onClick={() => updateClass(cls.id)} className="px-4 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-medium">Save Changes</button>
-                                                            <button onClick={() => setEditingId(null)} className="px-4 py-1.5 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm">Cancel</button>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    // Display Class Details
-                                                    <div>
-                                                        <h2 className="text-xl font-semibold text-green-800">{cls.title}</h2>
-                                                        <p className="text-sm text-gray-600 italic mb-2">{new Date(cls.date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} {cls.time ? `at ${cls.time}` : ''}</p>
-                                                        <p className="text-gray-700 mt-1 text-sm">{cls.description}</p>
-                                                        <div className="text-sm mt-2 space-x-4">
-                                                            <span>Capacity: {cls.capacity}</span>
-                                                            <span>Duration: {cls.duration} mins</span>
-                                                            <span>Price: £{cls.price?.toFixed(2)}</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-4 pt-3 mt-3 border-t border-gray-100">
-                                                            <button onClick={() => startEdit(cls)} className="text-sm text-blue-600 hover:underline">Edit</button>
-                                                            <button onClick={() => deleteClass(cls.id)} className="text-sm text-red-600 hover:underline">Delete Class</button>
-                                                            <button onClick={() => fetchRegister(cls.id)} className="px-3 py-1.5 border border-green-500 rounded-md text-green-700 hover:bg-green-50 text-xs font-medium">
-                                                                {openRegisterId === cls.id ? 'Hide Register' : `View Register (${cls.currentBookings}/${cls.capacity})`}
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
+                        <div className="space-y-10">
+                            {/* *** CHANGE: Upcoming Classes Section *** */}
+                            <section className="space-y-6">
+                                <h2 className="text-2xl font-semibold text-green-800 border-b pb-2">Manage Upcoming Classes</h2>
+                                {loading ? (
+                                    <p className="text-center text-gray-500">Loading classes...</p>
+                                ) : upcomingClasses.length === 0 ? (
+                                    <p className="text-center text-gray-500 italic">No upcoming classes found.</p>
+                                ) : (
+                                    upcomingClasses.map((cls) => (
+                                        <ClassListCard key={cls.id} cls={cls} isHistory={false} />
+                                    ))
+                                )}
+                            </section>
 
-                                            {/* Register View (Conditional) */}
-                                            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${openRegisterId === cls.id ? 'opacity-100 lg:w-1/3 max-h-[400px] lg:max-h-full mt-4 lg:mt-0' : 'opacity-0 w-0 max-h-0'}`}>
-                                                <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg shadow-inner overflow-y-auto h-full max-h-[400px]">
-                                                    <h3 className="font-semibold text-gray-700 mb-3 text-sm">Registered ({registrations[cls.id]?.length || 0}):</h3>
-                                                    {registrations[cls.id]?.length > 0 ? (
-                                                        <ul className="space-y-2">{registrations[cls.id].map(reg => (
-                                                            <li key={reg.bookingId} className="p-2 rounded-md bg-white border border-gray-200 text-xs">
-                                                                <span className="block font-medium text-gray-800">{reg.name}</span>
-                                                                <span className="text-gray-500 block">{reg.email}</span>
-                                                                <span className="text-gray-500 block">{reg.phone}</span>
-                                                            </li>
-                                                        ))}</ul>
-                                                    ) : <p className="text-xs text-gray-500 italic">No participants registered yet.</p>}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </section>
-                                ))
-                            )}
+                            {/* *** CHANGE: Past Classes (History) Section *** */}
+                            <section className="space-y-6">
+                                <h2 className="text-2xl font-semibold text-gray-700 border-b pb-2">Class History</h2>
+                                {loading ? (
+                                    <p className="text-center text-gray-500">Loading history...</p>
+                                ) : pastClasses.length === 0 ? (
+                                    <p className="text-center text-gray-500 italic">No past classes found.</p>
+                                ) : (
+                                    pastClasses.map((cls) => (
+                                        <ClassListCard key={cls.id} cls={cls} isHistory={true} />
+                                    ))
+                                )}
+                            </section>
                         </div>
                     ) : (
                         // Calendar View
@@ -456,6 +514,7 @@ export default function AdminDashboard() {
                                 <h3 className="text-xl font-semibold text-[#2e7d6f] mb-4 border-b pb-2">
                                     Classes on {calendarDate.toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' })}
                                 </h3>
+                                {/* This correctly maps ALL classes for the selected date */}
                                 {classesOnDate(calendarDate).length === 0 ? (
                                     <p className="text-gray-500 text-sm italic">No classes scheduled.</p>
                                 ) : (
